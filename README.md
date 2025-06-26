@@ -236,7 +236,7 @@ Contribuições são sempre bem-vindas! Para contribuir:
 ## 📞 **Contato & Suporte**
 
 - **Desenvolvedor:** peSuperSam
-- **Email:** [seu-email@exemplo.com]
+- **Email:** [contatomateusant@gmail.com]
 - **GitHub:** [@peSuperSam](https://github.com/peSuperSam)
 - **Issues:** [Reportar Bug](https://github.com/peSuperSam/integramente-front/issues)
 
