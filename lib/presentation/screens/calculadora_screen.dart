@@ -760,10 +760,97 @@ class _CalculadoraScreenState extends State<CalculadoraScreen> {
   }
 
   Widget _buildEstadoVazio() {
-    return EmptyStateCard(
-      titulo: 'Pronto para Calcular',
-      subtitulo: _getMensagemEstadoVazio(),
-      icon: _getIconePorTipo(),
+    final hasFunction = _expressaoController.text.trim().isNotEmpty;
+
+    return Column(
+      children: [
+        EmptyStateCard(
+          titulo: 'Pronto para Calcular',
+          subtitulo: _getMensagemEstadoVazio(),
+          icon: _getIconePorTipo(),
+        ),
+        if (hasFunction) ...[
+          const SizedBox(height: 16),
+          SectionCard(
+            titulo: 'Visualizações Disponíveis',
+            icon: Icons.visibility,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildBotaoVisualizacaoCard(
+                    icon: Icons.threed_rotation,
+                    label: 'Visualização 3D',
+                    subtitle: 'Ver função em 3D',
+                    color: const Color(0xFF4FC3F7),
+                    onPressed: _mostrarVisualizacao3D,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildBotaoVisualizacaoCard(
+                    icon: Icons.psychology,
+                    label: 'Análise IA',
+                    subtitle: 'Machine Learning',
+                    color: const Color(0xFF66BB6A),
+                    onPressed: _mostrarAnaliseIA,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBotaoVisualizacaoCard({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: color.withValues(alpha: 0.8),
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
