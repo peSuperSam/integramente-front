@@ -9,6 +9,7 @@ import '../../presentation/screens/calculadora_screen.dart';
 import '../../presentation/screens/historico_screen.dart';
 import '../../presentation/screens/tutorial_screen.dart';
 import '../../presentation/screens/configuracoes_screen.dart';
+import '../../presentation/screens/advanced_features_screen.dart';
 
 class AppRouter {
   static const String root = '/';
@@ -18,6 +19,7 @@ class AppRouter {
   static const String historico = '/historico';
   static const String tutorial = '/tutorial';
   static const String configuracoes = '/configuracoes';
+  static const String advancedFeatures = '/advanced-features';
 
   static final GoRouter router = GoRouter(
     initialLocation: root,
@@ -56,6 +58,11 @@ class AppRouter {
         path: configuracoes,
         name: 'configuracoes',
         builder: (context, state) => const ConfiguracoesScreen(),
+      ),
+      GoRoute(
+        path: advancedFeatures,
+        name: 'advancedFeatures',
+        builder: (context, state) => const AdvancedFeaturesScreen(),
       ),
     ],
     errorBuilder:

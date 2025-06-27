@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 class BackendConfig {
   // Configurações de desenvolvimento (local)
-  static const String _devBaseUrl = 'http://localhost:5000';
+  static const String _devBaseUrl = 'http://localhost:8000';
 
   // Configurações de produção (Deploy no Render)
   static const String _prodBaseUrl =
@@ -23,13 +23,38 @@ class BackendConfig {
   // URLs de fallback (para uso futuro com retry automático)
   static List<String> get fallbackUrls => _fallbackUrls;
 
-  // Endpoints
+  // Endpoints principais
   static const String areaEndpoint = '/area';
   static const String simbolicoEndpoint = '/simbolico';
+  static const String derivadaEndpoint = '/derivada';
+  static const String limiteEndpoint = '/limite';
   static const String healthEndpoint = '/health';
   static const String validarEndpoint = '/validar';
   static const String exemplosEndpoint = '/exemplos';
   static const String graficoEndpoint = '/grafico';
+
+  // Novos endpoints - Visualização 3D
+  static const String visualization3dSurfaceEndpoint = '/3d/surface';
+  static const String visualization3dContourEndpoint = '/3d/contour';
+  static const String visualization3dVectorFieldEndpoint = '/3d/vector-field';
+  static const String visualization3dParametricEndpoint =
+      '/3d/parametric-surface';
+  static const String visualization3dVolumeEndpoint = '/3d/integration-volume';
+  static const String visualization3dGradientEndpoint = '/3d/gradient-field';
+
+  // Novos endpoints - Machine Learning
+  static const String mlAnalyzeFunctionEndpoint = '/ml/analyze-function';
+  static const String mlIntegrationDifficultyEndpoint =
+      '/ml/integration-difficulty';
+  static const String mlComputationTimeEndpoint = '/ml/computation-time';
+  static const String mlOptimalResolutionEndpoint = '/ml/optimal-resolution';
+  static const String mlModelInfoEndpoint = '/ml/model-info';
+
+  // Novos endpoints - Performance
+  static const String performanceSummaryEndpoint = '/performance/summary';
+  static const String performanceCacheEndpoint = '/performance/cache';
+  static const String performancePrecisionEndpoint = '/performance/precision';
+  static const String securityStatsEndpoint = '/security/stats';
 
   // Configurações de timeout
   static const Duration defaultTimeout = Duration(seconds: 30);
@@ -69,13 +94,48 @@ class BackendConfig {
   static bool get showLogs => currentConfig['showLogs'] as bool;
   static bool get fallbackToLocal => currentConfig['fallbackToLocal'] as bool;
 
-  // URLs completas
+  // URLs completas - Endpoints principais
   static String get areaUrl => '$baseUrl$areaEndpoint';
   static String get simbolicoUrl => '$baseUrl$simbolicoEndpoint';
+  static String get derivadaUrl => '$baseUrl$derivadaEndpoint';
+  static String get limiteUrl => '$baseUrl$limiteEndpoint';
   static String get healthUrl => '$baseUrl$healthEndpoint';
   static String get validarUrl => '$baseUrl$validarEndpoint';
   static String get exemplosUrl => '$baseUrl$exemplosEndpoint';
   static String get graficoUrl => '$baseUrl$graficoEndpoint';
+
+  // URLs completas - Visualização 3D
+  static String get visualization3dSurfaceUrl =>
+      '$baseUrl$visualization3dSurfaceEndpoint';
+  static String get visualization3dContourUrl =>
+      '$baseUrl$visualization3dContourEndpoint';
+  static String get visualization3dVectorFieldUrl =>
+      '$baseUrl$visualization3dVectorFieldEndpoint';
+  static String get visualization3dParametricUrl =>
+      '$baseUrl$visualization3dParametricEndpoint';
+  static String get visualization3dVolumeUrl =>
+      '$baseUrl$visualization3dVolumeEndpoint';
+  static String get visualization3dGradientUrl =>
+      '$baseUrl$visualization3dGradientEndpoint';
+
+  // URLs completas - Machine Learning
+  static String get mlAnalyzeFunctionUrl =>
+      '$baseUrl$mlAnalyzeFunctionEndpoint';
+  static String get mlIntegrationDifficultyUrl =>
+      '$baseUrl$mlIntegrationDifficultyEndpoint';
+  static String get mlComputationTimeUrl =>
+      '$baseUrl$mlComputationTimeEndpoint';
+  static String get mlOptimalResolutionUrl =>
+      '$baseUrl$mlOptimalResolutionEndpoint';
+  static String get mlModelInfoUrl => '$baseUrl$mlModelInfoEndpoint';
+
+  // URLs completas - Performance
+  static String get performanceSummaryUrl =>
+      '$baseUrl$performanceSummaryEndpoint';
+  static String get performanceCacheUrl => '$baseUrl$performanceCacheEndpoint';
+  static String get performancePrecisionUrl =>
+      '$baseUrl$performancePrecisionEndpoint';
+  static String get securityStatsUrl => '$baseUrl$securityStatsEndpoint';
 
   // Método para testar conectividade com fallback
   static Future<String?> findWorkingUrl() async {

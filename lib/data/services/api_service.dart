@@ -5,6 +5,9 @@ import '../../core/config/backend_config.dart';
 import '../../core/utils/app_logger.dart';
 import '../models/funcao_matematica.dart';
 import '../models/calculo_response.dart';
+import '../models/visualization_3d_models.dart';
+import '../models/ml_models.dart';
+import '../models/performance_models.dart';
 
 class ApiService {
   // Configuração dinâmica do backend
@@ -71,6 +74,70 @@ class ApiService {
       return _handleSimbolicoResponse(response);
     } catch (e) {
       return CalculoSimbolicoResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Calcula a derivada de uma função
+  Future<CalculoDerivadaResponse> calcularDerivada({
+    required FuncaoMatematica funcao,
+    bool mostrarPassos = true,
+    String tipoDerivada = 'primeira',
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.derivadaUrl);
+
+      final requestBody = {
+        'funcao': funcao.expressao,
+        'mostrar_passos': mostrarPassos,
+        'formato_latex': true,
+        'tipo_derivada': tipoDerivada,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(requestBody))
+          .timeout(_timeout);
+
+      return _handleDerivadaResponse(response);
+    } catch (e) {
+      return CalculoDerivadaResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Calcula o limite de uma função
+  Future<CalculoLimiteResponse> calcularLimite({
+    required FuncaoMatematica funcao,
+    required double pontoLimite,
+    bool mostrarPassos = true,
+    String tipoLimite = 'bilateral',
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.limiteUrl);
+
+      final requestBody = {
+        'funcao': funcao.expressao,
+        'ponto_limite': pontoLimite,
+        'mostrar_passos': mostrarPassos,
+        'formato_latex': true,
+        'tipo_limite': tipoLimite,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(requestBody))
+          .timeout(_timeout);
+
+      return _handleLimiteResponse(response);
+    } catch (e) {
+      return CalculoLimiteResponse(
         sucesso: false,
         erro: _formatarErro(e),
         calculadoEm: DateTime.now(),
@@ -228,6 +295,50 @@ class ApiService {
     }
   }
 
+  CalculoDerivadaResponse _handleDerivadaResponse(http.Response response) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return CalculoDerivadaResponse.fromJson(data);
+      } else {
+        final errorData = jsonDecode(response.body);
+        return CalculoDerivadaResponse(
+          sucesso: false,
+          erro: errorData['erro'] ?? 'Erro desconhecido no servidor',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return CalculoDerivadaResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta do servidor: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  CalculoLimiteResponse _handleLimiteResponse(http.Response response) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return CalculoLimiteResponse.fromJson(data);
+      } else {
+        final errorData = jsonDecode(response.body);
+        return CalculoLimiteResponse(
+          sucesso: false,
+          erro: errorData['erro'] ?? 'Erro desconhecido no servidor',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return CalculoLimiteResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta do servidor: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
   String _formatarErro(dynamic erro) {
     if (erro is http.ClientException) {
       return 'Erro de conexão: ${erro.message}';
@@ -282,6 +393,59 @@ class ApiService {
     );
   }
 
+  Future<CalculoDerivadaResponse> calcularDerivadaLocal({
+    required FuncaoMatematica funcao,
+    String tipoDerivada = 'primeira',
+  }) async {
+    // Simula processamento
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final derivada = _calcularDerivadaMockada(funcao.expressao);
+
+    return CalculoDerivadaResponse(
+      sucesso: true,
+      derivada: derivada,
+      derivadaLatex: _converterParaLatex(derivada),
+      derivadaSimplificada: derivada,
+      tipoDerivada: tipoDerivada,
+      funcaoOriginal: funcao.expressao,
+      passosResolucao: [
+        'Função original: ${funcao.expressao}',
+        'Aplicando regras de derivação',
+        'Derivada: $derivada',
+      ],
+      calculadoEm: DateTime.now(),
+    );
+  }
+
+  Future<CalculoLimiteResponse> calcularLimiteLocal({
+    required FuncaoMatematica funcao,
+    required double pontoLimite,
+    String tipoLimite = 'bilateral',
+  }) async {
+    // Simula processamento
+    await Future.delayed(const Duration(milliseconds: 700));
+
+    final valorLimite = _calcularLimiteMockado(funcao.expressao, pontoLimite);
+    final existeLimite = valorLimite.isFinite;
+
+    return CalculoLimiteResponse(
+      sucesso: true,
+      valorLimite: existeLimite ? valorLimite : null,
+      limiteLatex: existeLimite ? valorLimite.toString() : '∄',
+      tipoLimite: tipoLimite,
+      existeLimite: existeLimite,
+      funcaoOriginal: funcao.expressao,
+      pontoLimite: pontoLimite,
+      passosResolucao: [
+        'Função: ${funcao.expressao}',
+        'Calculando limite quando x → $pontoLimite',
+        existeLimite ? 'Limite = $valorLimite' : 'Limite não existe',
+      ],
+      calculadoEm: DateTime.now(),
+    );
+  }
+
   // Métodos auxiliares para cálculos mockados
   double _calcularAreaMockada(String expressao, double a, double b) {
     // Cálculo simplificado para demonstração
@@ -320,5 +484,693 @@ class ApiService {
         .replaceAll('/', '\\frac{1}{')
         .replaceAll('sin', '\\sin')
         .replaceAll('cos', '\\cos');
+  }
+
+  String _calcularDerivadaMockada(String expressao) {
+    if (expressao.contains('x^3')) {
+      return '3x²';
+    } else if (expressao.contains('x^2')) {
+      return '2x';
+    } else if (expressao.contains('sin(x)')) {
+      return 'cos(x)';
+    } else if (expressao.contains('cos(x)')) {
+      return '-sin(x)';
+    } else if (expressao.contains('ln(x)')) {
+      return '1/x';
+    } else if (expressao.contains('e^x')) {
+      return 'e^x';
+    } else if (expressao.contains('x')) {
+      return '1';
+    } else {
+      return '0'; // Derivada de constante
+    }
+  }
+
+  double _calcularLimiteMockado(String expressao, double ponto) {
+    // Simulação simples de cálculo de limite
+    try {
+      if (expressao.contains('sin(x)/x') && ponto == 0) {
+        return 1.0; // Limite famoso lim(x→0) sin(x)/x = 1
+      } else if (expressao.contains('(x^2-1)/(x-1)') && ponto == 1) {
+        return 2.0; // lim(x→1) (x²-1)/(x-1) = 2
+      } else if (expressao.contains('(e^x-1)/x') && ponto == 0) {
+        return 1.0; // lim(x→0) (e^x-1)/x = 1
+      } else if (expressao.contains('1/x') && ponto == 0) {
+        return double.infinity; // Limite infinito
+      } else if (expressao.contains('x^2')) {
+        return ponto * ponto;
+      } else if (expressao.contains('x^3')) {
+        return ponto * ponto * ponto;
+      } else if (expressao.contains('x')) {
+        return ponto;
+      } else {
+        // Função constante
+        return double.tryParse(expressao) ?? 1.0;
+      }
+    } catch (e) {
+      return double.nan; // Limite indeterminado
+    }
+  }
+
+  // ========================================
+  // NOVOS MÉTODOS - VISUALIZAÇÃO 3D
+  // ========================================
+
+  /// Gera superfície 3D para função f(x,y)
+  Future<Visualization3DResponse> gerarSuperficie3D({
+    required String funcao,
+    required List<double> xRange,
+    required List<double> yRange,
+    int resolution = 50,
+    Map<String, dynamic>? opcoes,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.visualization3dSurfaceUrl);
+
+      final request = Visualization3DRequest(
+        funcao: funcao,
+        xRange: xRange,
+        yRange: yRange,
+        resolution: resolution,
+        opcoes: opcoes,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleVisualization3DResponse(response);
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Gera contornos 3D para função f(x,y)
+  Future<Visualization3DResponse> gerarContorno3D({
+    required String funcao,
+    required List<double> xRange,
+    required List<double> yRange,
+    int resolution = 50,
+    Map<String, dynamic>? opcoes,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.visualization3dContourUrl);
+
+      final request = Visualization3DRequest(
+        funcao: funcao,
+        xRange: xRange,
+        yRange: yRange,
+        resolution: resolution,
+        opcoes: opcoes,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleVisualization3DResponse(response);
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Gera campo vetorial 3D
+  Future<Visualization3DResponse> gerarCampoVetorial3D({
+    required String fx,
+    required String fy,
+    required String fz,
+    required List<double> xRange,
+    required List<double> yRange,
+    required List<double> zRange,
+    int resolution = 20,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.visualization3dVectorFieldUrl);
+
+      final request = VectorField3DRequest(
+        fx: fx,
+        fy: fy,
+        fz: fz,
+        xRange: xRange,
+        yRange: yRange,
+        zRange: zRange,
+        resolution: resolution,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleVisualization3DResponse(response);
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Gera superfície paramétrica 3D
+  Future<Visualization3DResponse> gerarSuperficieParametrica3D({
+    required String fx,
+    required String fy,
+    required String fz,
+    required List<double> uRange,
+    required List<double> vRange,
+    int resolution = 50,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.visualization3dParametricUrl);
+
+      final request = ParametricSurface3DRequest(
+        fx: fx,
+        fy: fy,
+        fz: fz,
+        uRange: uRange,
+        vRange: vRange,
+        resolution: resolution,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleVisualization3DResponse(response);
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Gera volume de integração 3D
+  Future<Visualization3DResponse> gerarVolumeIntegracao3D({
+    required String funcao,
+    required List<double> xRange,
+    required List<double> yRange,
+    int resolution = 50,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.visualization3dVolumeUrl);
+
+      final request = IntegrationVolume3DRequest(
+        funcao: funcao,
+        xRange: xRange,
+        yRange: yRange,
+        resolution: resolution,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleVisualization3DResponse(response);
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Gera campo gradiente 3D
+  Future<Visualization3DResponse> gerarCampoGradiente3D({
+    required String funcao,
+    required List<double> xRange,
+    required List<double> yRange,
+    int resolution = 20,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.visualization3dGradientUrl);
+
+      final request = Visualization3DRequest(
+        funcao: funcao,
+        xRange: xRange,
+        yRange: yRange,
+        resolution: resolution,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleVisualization3DResponse(response);
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  // ========================================
+  // NOVOS MÉTODOS - MACHINE LEARNING
+  // ========================================
+
+  /// Análise completa de função com ML
+  Future<MLAnalysisResponse> analisarFuncaoML({
+    required String funcao,
+    Map<String, dynamic>? opcoes,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.mlAnalyzeFunctionUrl);
+
+      final request = MLAnalysisRequest(funcao: funcao, opcoes: opcoes);
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleMLAnalysisResponse(response);
+    } catch (e) {
+      return MLAnalysisResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Predição de dificuldade de integração
+  Future<MLIntegrationDifficultyResponse> predizerDificuldadeIntegracao({
+    required String funcao,
+    List<double>? interval,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.mlIntegrationDifficultyUrl);
+
+      final request = MLIntegrationDifficultyRequest(
+        funcao: funcao,
+        interval: interval,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleMLIntegrationDifficultyResponse(response);
+    } catch (e) {
+      return MLIntegrationDifficultyResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Estimativa de tempo de computação
+  Future<MLComputationTimeResponse> estimarTempoComputacao({
+    required String funcao,
+    int? resolution,
+    List<double>? interval,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.mlComputationTimeUrl);
+
+      final request = MLComputationTimeRequest(
+        funcao: funcao,
+        resolution: resolution,
+        interval: interval,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleMLComputationTimeResponse(response);
+    } catch (e) {
+      return MLComputationTimeResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Predição de resolução ótima
+  Future<MLOptimalResolutionResponse> predizerResolucaoOtima({
+    required String funcao,
+    List<double>? interval,
+    double? tolerancia,
+  }) async {
+    try {
+      final url = Uri.parse(BackendConfig.mlOptimalResolutionUrl);
+
+      final request = MLOptimalResolutionRequest(
+        funcao: funcao,
+        interval: interval,
+        tolerancia: tolerancia,
+      );
+
+      final response = await http
+          .post(url, headers: _headers, body: jsonEncode(request.toJson()))
+          .timeout(_timeout);
+
+      return _handleMLOptimalResolutionResponse(response);
+    } catch (e) {
+      return MLOptimalResolutionResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Informações dos modelos ML
+  Future<MLModelInfoResponse> obterInfoModelosML() async {
+    try {
+      final url = Uri.parse(BackendConfig.mlModelInfoUrl);
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handleMLModelInfoResponse(response);
+    } catch (e) {
+      return MLModelInfoResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  // ========================================
+  // NOVOS MÉTODOS - PERFORMANCE
+  // ========================================
+
+  /// Resumo de performance do sistema
+  Future<PerformanceSummaryResponse> obterResumoPerformance() async {
+    try {
+      final url = Uri.parse(BackendConfig.performanceSummaryUrl);
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handlePerformanceSummaryResponse(response);
+    } catch (e) {
+      return PerformanceSummaryResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Estatísticas de cache
+  Future<CacheStatsResponse> obterEstatisticasCache() async {
+    try {
+      final url = Uri.parse(BackendConfig.performanceCacheUrl);
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handleCacheStatsResponse(response);
+    } catch (e) {
+      return CacheStatsResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Análise de precisão
+  Future<PrecisionAnalysisResponse> obterAnalisesPrecisao() async {
+    try {
+      final url = Uri.parse(BackendConfig.performancePrecisionUrl);
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handlePrecisionAnalysisResponse(response);
+    } catch (e) {
+      return PrecisionAnalysisResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Estatísticas de segurança
+  Future<SecurityStatsResponse> obterEstatisticasSeguranca() async {
+    try {
+      final url = Uri.parse(BackendConfig.securityStatsUrl);
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handleSecurityStatsResponse(response);
+    } catch (e) {
+      return SecurityStatsResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  // ========================================
+  // MÉTODOS AUXILIARES PARA HANDLING RESPONSES
+  // ========================================
+
+  Visualization3DResponse _handleVisualization3DResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Visualization3DResponse.fromJson(data);
+      } else {
+        return Visualization3DResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return Visualization3DResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  MLAnalysisResponse _handleMLAnalysisResponse(http.Response response) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MLAnalysisResponse.fromJson(data);
+      } else {
+        return MLAnalysisResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return MLAnalysisResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  MLIntegrationDifficultyResponse _handleMLIntegrationDifficultyResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MLIntegrationDifficultyResponse.fromJson(data);
+      } else {
+        return MLIntegrationDifficultyResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return MLIntegrationDifficultyResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  MLComputationTimeResponse _handleMLComputationTimeResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MLComputationTimeResponse.fromJson(data);
+      } else {
+        return MLComputationTimeResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return MLComputationTimeResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  MLOptimalResolutionResponse _handleMLOptimalResolutionResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MLOptimalResolutionResponse.fromJson(data);
+      } else {
+        return MLOptimalResolutionResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return MLOptimalResolutionResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  MLModelInfoResponse _handleMLModelInfoResponse(http.Response response) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MLModelInfoResponse.fromJson(data);
+      } else {
+        return MLModelInfoResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return MLModelInfoResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  PerformanceSummaryResponse _handlePerformanceSummaryResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return PerformanceSummaryResponse.fromJson(data);
+      } else {
+        return PerformanceSummaryResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return PerformanceSummaryResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  CacheStatsResponse _handleCacheStatsResponse(http.Response response) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return CacheStatsResponse.fromJson(data);
+      } else {
+        return CacheStatsResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return CacheStatsResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  PrecisionAnalysisResponse _handlePrecisionAnalysisResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return PrecisionAnalysisResponse.fromJson(data);
+      } else {
+        return PrecisionAnalysisResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return PrecisionAnalysisResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  SecurityStatsResponse _handleSecurityStatsResponse(http.Response response) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return SecurityStatsResponse.fromJson(data);
+      } else {
+        return SecurityStatsResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return SecurityStatsResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
   }
 }

@@ -177,3 +177,138 @@ class CalculoSimbolicoResponse extends Equatable {
     calculadoEm,
   ];
 }
+
+class CalculoDerivadaResponse extends Equatable {
+  final bool sucesso;
+  final String? derivada;
+  final String? derivadaLatex;
+  final String? derivadaSimplificada;
+  final List<String>? passosResolucao;
+  final String? funcaoOriginal;
+  final String? tipoDerivada; // primeira, segunda, etc.
+  final String? erro;
+  final DateTime calculadoEm;
+
+  const CalculoDerivadaResponse({
+    required this.sucesso,
+    this.derivada,
+    this.derivadaLatex,
+    this.derivadaSimplificada,
+    this.passosResolucao,
+    this.funcaoOriginal,
+    this.tipoDerivada,
+    this.erro,
+    required this.calculadoEm,
+  });
+
+  factory CalculoDerivadaResponse.fromJson(Map<String, dynamic> json) {
+    return CalculoDerivadaResponse(
+      sucesso: json['sucesso'] ?? false,
+      derivada: json['derivada'],
+      derivadaLatex: json['derivada_latex'],
+      derivadaSimplificada: json['derivada_simplificada'],
+      passosResolucao: json['passos_resolucao']?.cast<String>(),
+      funcaoOriginal: json['funcao_original'],
+      tipoDerivada: json['tipo_derivada'] ?? 'primeira',
+      erro: json['erro'],
+      calculadoEm: _ResponseUtils.parseDateTime(json['calculado_em']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sucesso': sucesso,
+      'derivada': derivada,
+      'derivada_latex': derivadaLatex,
+      'derivada_simplificada': derivadaSimplificada,
+      'passos_resolucao': passosResolucao,
+      'funcao_original': funcaoOriginal,
+      'tipo_derivada': tipoDerivada,
+      'erro': erro,
+      'calculado_em': calculadoEm.toIso8601String(),
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+    sucesso,
+    derivada,
+    derivadaLatex,
+    derivadaSimplificada,
+    passosResolucao,
+    funcaoOriginal,
+    tipoDerivada,
+    erro,
+    calculadoEm,
+  ];
+}
+
+class CalculoLimiteResponse extends Equatable {
+  final bool sucesso;
+  final double? valorLimite;
+  final String? limiteLatex;
+  final String? tipoLimite; // esquerda, direita, bilateral
+  final bool existeLimite;
+  final List<String>? passosResolucao;
+  final String? funcaoOriginal;
+  final double? pontoLimite;
+  final String? erro;
+  final DateTime calculadoEm;
+
+  const CalculoLimiteResponse({
+    required this.sucesso,
+    this.valorLimite,
+    this.limiteLatex,
+    this.tipoLimite,
+    this.existeLimite = false,
+    this.passosResolucao,
+    this.funcaoOriginal,
+    this.pontoLimite,
+    this.erro,
+    required this.calculadoEm,
+  });
+
+  factory CalculoLimiteResponse.fromJson(Map<String, dynamic> json) {
+    return CalculoLimiteResponse(
+      sucesso: json['sucesso'] ?? false,
+      valorLimite: json['valor_limite']?.toDouble(),
+      limiteLatex: json['limite_latex'],
+      tipoLimite: json['tipo_limite'] ?? 'bilateral',
+      existeLimite: json['existe_limite'] ?? false,
+      passosResolucao: json['passos_resolucao']?.cast<String>(),
+      funcaoOriginal: json['funcao_original'],
+      pontoLimite: json['ponto_limite']?.toDouble(),
+      erro: json['erro'],
+      calculadoEm: _ResponseUtils.parseDateTime(json['calculado_em']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sucesso': sucesso,
+      'valor_limite': valorLimite,
+      'limite_latex': limiteLatex,
+      'tipo_limite': tipoLimite,
+      'existe_limite': existeLimite,
+      'passos_resolucao': passosResolucao,
+      'funcao_original': funcaoOriginal,
+      'ponto_limite': pontoLimite,
+      'erro': erro,
+      'calculado_em': calculadoEm.toIso8601String(),
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+    sucesso,
+    valorLimite,
+    limiteLatex,
+    tipoLimite,
+    existeLimite,
+    passosResolucao,
+    funcaoOriginal,
+    pontoLimite,
+    erro,
+    calculadoEm,
+  ];
+}

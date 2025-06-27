@@ -335,4 +335,110 @@ class AppController extends GetxController {
       _isLoading.value = false;
     }
   }
+
+  Future<void> calcularDerivada({String tipoDerivada = 'primeira'}) async {
+    if (_funcaoAtual.value == null || !_funcaoAtual.value!.isValida) {
+      _erro.value = 'Função inválida para cálculo';
+      return;
+    }
+
+    try {
+      _isLoading.value = true;
+      _erro.value = '';
+
+      // Garante que o ApiService está carregado
+      final apiService = await _ensureApiService();
+
+      // Tenta conectar com o backend primeiro
+      final backendDisponivel = await apiService.verificarConexao();
+
+      CalculoDerivadaResponse resultado;
+
+      if (backendDisponivel) {
+        // Usa API real
+        resultado = await apiService.calcularDerivada(
+          funcao: _funcaoAtual.value!,
+          mostrarPassos: true,
+          tipoDerivada: tipoDerivada,
+        );
+      } else {
+        // Fallback para cálculo local
+        resultado = await apiService.calcularDerivadaLocal(
+          funcao: _funcaoAtual.value!,
+          tipoDerivada: tipoDerivada,
+        );
+      }
+
+      final historicoItem = HistoricoItem.derivada(
+        funcao: _funcaoAtual.value!,
+        resultado: resultado,
+      );
+
+      await adicionarAoHistorico(historicoItem);
+
+      if (!resultado.sucesso) {
+        _erro.value = resultado.erro ?? 'Erro no cálculo';
+      }
+    } catch (e) {
+      _erro.value = 'Erro no cálculo: ${e.toString()}';
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> calcularLimite({
+    required double pontoLimite,
+    String tipoLimite = 'bilateral',
+  }) async {
+    if (_funcaoAtual.value == null || !_funcaoAtual.value!.isValida) {
+      _erro.value = 'Função inválida para cálculo';
+      return;
+    }
+
+    try {
+      _isLoading.value = true;
+      _erro.value = '';
+
+      // Garante que o ApiService está carregado
+      final apiService = await _ensureApiService();
+
+      // Tenta conectar com o backend primeiro
+      final backendDisponivel = await apiService.verificarConexao();
+
+      CalculoLimiteResponse resultado;
+
+      if (backendDisponivel) {
+        // Usa API real
+        resultado = await apiService.calcularLimite(
+          funcao: _funcaoAtual.value!,
+          pontoLimite: pontoLimite,
+          mostrarPassos: true,
+          tipoLimite: tipoLimite,
+        );
+      } else {
+        // Fallback para cálculo local
+        resultado = await apiService.calcularLimiteLocal(
+          funcao: _funcaoAtual.value!,
+          pontoLimite: pontoLimite,
+          tipoLimite: tipoLimite,
+        );
+      }
+
+      final historicoItem = HistoricoItem.limite(
+        funcao: _funcaoAtual.value!,
+        pontoLimite: pontoLimite,
+        resultado: resultado,
+      );
+
+      await adicionarAoHistorico(historicoItem);
+
+      if (!resultado.sucesso) {
+        _erro.value = resultado.erro ?? 'Erro no cálculo';
+      }
+    } catch (e) {
+      _erro.value = 'Erro no cálculo: ${e.toString()}';
+    } finally {
+      _isLoading.value = false;
+    }
+  }
 }

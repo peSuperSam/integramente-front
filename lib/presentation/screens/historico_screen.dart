@@ -57,51 +57,50 @@ class _HistoricoScreenState extends State<HistoricoScreen>
     });
   }
 
-  List<HistoricoItem> get _historicoFiltrado {
-    return _performanceMonitor.measure('filtrar_historico', () {
-      var resultado = _historico;
+  List<HistoricoItem> get _itensFiltrados {
+    var itens = _historico;
 
-      if (_filtro.isNotEmpty) {
-        resultado =
-            resultado
-                .where(
-                  (item) =>
-                      item.funcao.expressao.toLowerCase().contains(
-                        _filtro.toLowerCase(),
-                      ) ||
-                      item.descricaoResultado.toLowerCase().contains(
-                        _filtro.toLowerCase(),
-                      ),
-                )
-                .toList();
-      }
+    // Filtro por tipo
+    if (_tipoFiltro != 'Todos') {
+      final tipo =
+          _tipoFiltro == 'Área'
+              ? TipoCalculo.area
+              : _tipoFiltro == 'Simbólico'
+              ? TipoCalculo.simbolico
+              : _tipoFiltro == 'Derivada'
+              ? TipoCalculo.derivada
+              : TipoCalculo.limite;
+      itens = itens.where((item) => item.tipo == tipo).toList();
+    }
 
+    // Filtro por busca
+    if (_filtro.isNotEmpty) {
+      itens =
+          itens
+              .where(
+                (item) =>
+                    item.funcao.expressao.toLowerCase().contains(
+                      _filtro.toLowerCase(),
+                    ) ||
+                    item.descricaoResultado.toLowerCase().contains(
+                      _filtro.toLowerCase(),
+                    ),
+              )
+              .toList();
       if (_tipoFiltro != 'Todos') {
-        final tipoEnum =
-            _tipoFiltro == 'Área' ? TipoCalculo.area : TipoCalculo.simbolico;
-        resultado = resultado.where((item) => item.tipo == tipoEnum).toList();
+        final tipo =
+            _tipoFiltro == 'Área'
+                ? TipoCalculo.area
+                : _tipoFiltro == 'Simbólico'
+                ? TipoCalculo.simbolico
+                : _tipoFiltro == 'Derivada'
+                ? TipoCalculo.derivada
+                : TipoCalculo.limite;
+        itens = itens.where((item) => item.tipo == tipo).toList();
       }
+    }
 
-      switch (_ordenacao) {
-        case 'Mais Recente':
-          resultado.sort((a, b) => b.criadoEm.compareTo(a.criadoEm));
-          break;
-        case 'Mais Antigo':
-          resultado.sort((a, b) => a.criadoEm.compareTo(b.criadoEm));
-          break;
-        case 'Função A-Z':
-          resultado.sort(
-            (a, b) => a.funcao.expressao.compareTo(b.funcao.expressao),
-          );
-          break;
-        case 'Favoritos':
-          resultado = resultado.where((item) => item.isFavorito).toList();
-          resultado.sort((a, b) => b.criadoEm.compareTo(a.criadoEm));
-          break;
-      }
-
-      return resultado;
-    });
+    return itens;
   }
 
   @override
@@ -425,7 +424,7 @@ class _HistoricoScreenState extends State<HistoricoScreen>
     return Wrap(
       spacing: 8,
       children:
-          ['Todos', 'Área', 'Simbólico'].map((tipo) {
+          ['Todos', 'Área', 'Simbólico', 'Derivada', 'Limite'].map((tipo) {
             final isSelected = _tipoFiltro == tipo;
             return FilterChip(
               label: Text(tipo),
@@ -583,7 +582,7 @@ class _HistoricoScreenState extends State<HistoricoScreen>
       return _buildLoadingState();
     }
 
-    final historicoFiltrado = _historicoFiltrado;
+    final historicoFiltrado = _itensFiltrados;
 
     if (historicoFiltrado.isEmpty) {
       return _buildEmptyState();
@@ -733,6 +732,10 @@ class _HistoricoScreenState extends State<HistoricoScreen>
         return AppColors.integralColor;
       case TipoCalculo.simbolico:
         return AppColors.derivativeColor;
+      case TipoCalculo.derivada:
+        return AppColors.functionColor;
+      case TipoCalculo.limite:
+        return AppColors.variableColor;
     }
   }
 
@@ -742,6 +745,10 @@ class _HistoricoScreenState extends State<HistoricoScreen>
         return Icons.area_chart;
       case TipoCalculo.simbolico:
         return Icons.functions;
+      case TipoCalculo.derivada:
+        return Icons.trending_up;
+      case TipoCalculo.limite:
+        return Icons.arrow_forward;
     }
   }
 
