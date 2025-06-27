@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import '../../core/theme/app_theme.dart';
-import '../../core/utils/snackbar_utils.dart';
 import '../../data/models/visualization_3d_models.dart';
 import '../../data/services/api_service.dart';
 
@@ -123,7 +120,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -137,7 +134,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
@@ -162,7 +159,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
                         Text(
                           'f(x,y) = ${widget.funcao}',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 12,
                           ),
                         ),
@@ -176,10 +173,10 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.2),
+                        color: Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.green.withOpacity(0.3),
+                          color: Colors.green.withValues(alpha: 0.3),
                         ),
                       ),
                       child: const Text(
@@ -243,7 +240,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
                               child: Text(
                                 _erro!,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
@@ -299,7 +296,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
           Text(
             _getTypeDescription(),
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -309,7 +306,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -331,7 +328,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
           Text(
             'Para visualizar o gráfico 3D interativo, acesse o backend diretamente.',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 12,
             ),
             textAlign: TextAlign.center,
@@ -381,7 +378,7 @@ class _Visualization3DWidgetState extends State<Visualization3DWidget> {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 14,
             ),
           ),

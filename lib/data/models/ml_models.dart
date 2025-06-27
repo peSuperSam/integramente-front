@@ -156,18 +156,31 @@ class MLAnalysisResponse {
   }
 
   String get difficultyLevel {
-    if (difficultyScore == null) return 'Desconhecido';
-    if (difficultyScore! < 0.3) return 'Fácil';
-    if (difficultyScore! < 0.6) return 'Médio';
-    if (difficultyScore! < 0.8) return 'Difícil';
+    if (difficultyScore == null) {
+      return 'Desconhecido';
+    }
+    if (difficultyScore! < 0.3) {
+      return 'Fácil';
+    }
+    if (difficultyScore! < 0.6) {
+      return 'Médio';
+    }
+    if (difficultyScore! < 0.8) {
+      return 'Difícil';
+    }
     return 'Muito Difícil';
   }
 
   String get estimatedTimeFormatted {
-    if (estimatedTime == null) return 'Desconhecido';
-    if (estimatedTime! < 1) return '< 1 segundo';
-    if (estimatedTime! < 60)
+    if (estimatedTime == null) {
+      return 'Desconhecido';
+    }
+    if (estimatedTime! < 1) {
+      return '< 1 segundo';
+    }
+    if (estimatedTime! < 60) {
       return '${estimatedTime!.toStringAsFixed(1)} segundos';
+    }
     return '${(estimatedTime! / 60).toStringAsFixed(1)} minutos';
   }
 }
@@ -230,10 +243,15 @@ class MLComputationTimeResponse {
   }
 
   String get estimatedTimeFormatted {
-    if (estimatedTimeSeconds == null) return 'Desconhecido';
-    if (estimatedTimeSeconds! < 1) return '< 1 segundo';
-    if (estimatedTimeSeconds! < 60)
+    if (estimatedTimeSeconds == null) {
+      return 'Desconhecido';
+    }
+    if (estimatedTimeSeconds! < 1) {
+      return '< 1 segundo';
+    }
+    if (estimatedTimeSeconds! < 60) {
       return '${estimatedTimeSeconds!.toStringAsFixed(1)} segundos';
+    }
     return '${(estimatedTimeSeconds! / 60).toStringAsFixed(1)} minutos';
   }
 }

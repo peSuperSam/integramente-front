@@ -949,6 +949,94 @@ class ApiService {
   }
 
   // ========================================
+  // NOVOS ENDPOINTS ADICIONAIS DE PERFORMANCE
+  // ========================================
+
+  /// Obter cálculos mais lentos
+  Future<SlowestCalculationsResponse> obterCalculosMaisLentos({
+    int limit = 5,
+  }) async {
+    try {
+      final url = Uri.parse(
+        '${BackendConfig.performanceSlowestUrl}?limit=$limit',
+      );
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handleSlowestCalculationsResponse(response);
+    } catch (e) {
+      return SlowestCalculationsResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Detectar problemas de performance
+  Future<PerformanceIssuesResponse> detectarProblemasPerformance() async {
+    try {
+      final url = Uri.parse(BackendConfig.performanceIssuesUrl);
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handlePerformanceIssuesResponse(response);
+    } catch (e) {
+      return PerformanceIssuesResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Exportar métricas de performance
+  Future<PerformanceExportResponse> exportarMetricasPerformance({
+    String format = 'json',
+  }) async {
+    try {
+      final url = Uri.parse(
+        '${BackendConfig.performanceExportUrl}?format=$format',
+      );
+
+      final response = await http
+          .get(url, headers: _headers)
+          .timeout(const Duration(seconds: 15));
+
+      return _handlePerformanceExportResponse(response);
+    } catch (e) {
+      return PerformanceExportResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  /// Reiniciar estatísticas de performance
+  Future<PerformanceResetResponse> reiniciarEstatisticasPerformance() async {
+    try {
+      final url = Uri.parse(BackendConfig.performanceResetUrl);
+
+      final response = await http
+          .post(url, headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      return _handlePerformanceResetResponse(response);
+    } catch (e) {
+      return PerformanceResetResponse(
+        sucesso: false,
+        erro: _formatarErro(e),
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  // ========================================
   // MÉTODOS AUXILIARES PARA HANDLING RESPONSES
   // ========================================
 
@@ -1167,6 +1255,99 @@ class ApiService {
       }
     } catch (e) {
       return SecurityStatsResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  // Novos handlers para endpoints adicionais
+  SlowestCalculationsResponse _handleSlowestCalculationsResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return SlowestCalculationsResponse.fromJson(data);
+      } else {
+        return SlowestCalculationsResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return SlowestCalculationsResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  PerformanceIssuesResponse _handlePerformanceIssuesResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return PerformanceIssuesResponse.fromJson(data);
+      } else {
+        return PerformanceIssuesResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return PerformanceIssuesResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  PerformanceExportResponse _handlePerformanceExportResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return PerformanceExportResponse.fromJson(data);
+      } else {
+        return PerformanceExportResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return PerformanceExportResponse(
+        sucesso: false,
+        erro: 'Erro ao processar resposta: $e',
+        calculadoEm: DateTime.now(),
+      );
+    }
+  }
+
+  PerformanceResetResponse _handlePerformanceResetResponse(
+    http.Response response,
+  ) {
+    try {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return PerformanceResetResponse.fromJson(data);
+      } else {
+        return PerformanceResetResponse(
+          sucesso: false,
+          erro: 'Erro HTTP ${response.statusCode}: ${response.body}',
+          calculadoEm: DateTime.now(),
+        );
+      }
+    } catch (e) {
+      return PerformanceResetResponse(
         sucesso: false,
         erro: 'Erro ao processar resposta: $e',
         calculadoEm: DateTime.now(),

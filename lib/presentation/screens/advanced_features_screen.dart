@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/visualization_3d_widget.dart';
 import '../widgets/ml_analysis_widget.dart';
 import '../widgets/performance_dashboard_widget.dart';
-import '../../core/theme/app_theme.dart';
 
 class AdvancedFeaturesScreen extends StatefulWidget {
   const AdvancedFeaturesScreen({super.key});
@@ -101,7 +100,7 @@ class _AdvancedFeaturesScreenState extends State<AdvancedFeaturesScreen>
         children: [
           // Formulário de entrada
           Card(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -300,7 +299,7 @@ class _AdvancedFeaturesScreenState extends State<AdvancedFeaturesScreen>
         children: [
           // Formulário de entrada
           Card(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(

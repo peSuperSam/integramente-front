@@ -54,6 +54,10 @@ class BackendConfig {
   static const String performanceSummaryEndpoint = '/performance/summary';
   static const String performanceCacheEndpoint = '/performance/cache';
   static const String performancePrecisionEndpoint = '/performance/precision';
+  static const String performanceSlowestEndpoint = '/performance/slowest';
+  static const String performanceIssuesEndpoint = '/performance/issues';
+  static const String performanceExportEndpoint = '/performance/export';
+  static const String performanceResetEndpoint = '/performance/reset';
   static const String securityStatsEndpoint = '/security/stats';
 
   // Configurações de timeout
@@ -135,6 +139,13 @@ class BackendConfig {
   static String get performanceCacheUrl => '$baseUrl$performanceCacheEndpoint';
   static String get performancePrecisionUrl =>
       '$baseUrl$performancePrecisionEndpoint';
+  static String get performanceSlowestUrl =>
+      '$baseUrl$performanceSlowestEndpoint';
+  static String get performanceIssuesUrl =>
+      '$baseUrl$performanceIssuesEndpoint';
+  static String get performanceExportUrl =>
+      '$baseUrl$performanceExportEndpoint';
+  static String get performanceResetUrl => '$baseUrl$performanceResetEndpoint';
   static String get securityStatsUrl => '$baseUrl$securityStatsEndpoint';
 
   // Método para testar conectividade com fallback

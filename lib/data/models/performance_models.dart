@@ -81,7 +81,7 @@ class CacheStats {
   }
 
   String get hitRateFormatted => '${(hitRate * 100).toStringAsFixed(1)}%';
-  String get usageFormatted => '${currentSize}/${maxSize}';
+  String get usageFormatted => '$currentSize/$maxSize';
   double get usagePercentage => maxSize > 0 ? currentSize / maxSize : 0.0;
 }
 
@@ -275,6 +275,188 @@ class SecurityStatsResponse {
           DateTime.tryParse(json['calculado_em'] ?? '') ?? DateTime.now(),
       stats:
           json['stats'] != null ? SecurityStats.fromJson(json['stats']) : null,
+    );
+  }
+}
+
+// Novos modelos para endpoints adicionais
+
+class SlowCalculation {
+  final String functionExpression;
+  final double executionTime;
+  final DateTime timestamp;
+  final Map<String, dynamic>? details;
+
+  SlowCalculation({
+    required this.functionExpression,
+    required this.executionTime,
+    required this.timestamp,
+    this.details,
+  });
+
+  factory SlowCalculation.fromJson(Map<String, dynamic> json) {
+    return SlowCalculation(
+      functionExpression: json['function_expression'] ?? '',
+      executionTime: (json['execution_time'] ?? 0).toDouble(),
+      timestamp: DateTime.tryParse(json['timestamp'] ?? '') ?? DateTime.now(),
+      details: json['details'],
+    );
+  }
+
+  String get executionTimeFormatted {
+    if (executionTime < 1) {
+      return '${(executionTime * 1000).toStringAsFixed(0)}ms';
+    }
+    return '${executionTime.toStringAsFixed(2)}s';
+  }
+}
+
+class PerformanceIssue {
+  final String type;
+  final String description;
+  final String severity;
+  final List<String> recommendations;
+  final Map<String, dynamic>? details;
+
+  PerformanceIssue({
+    required this.type,
+    required this.description,
+    required this.severity,
+    required this.recommendations,
+    this.details,
+  });
+
+  factory PerformanceIssue.fromJson(Map<String, dynamic> json) {
+    return PerformanceIssue(
+      type: json['type'] ?? '',
+      description: json['description'] ?? '',
+      severity: json['severity'] ?? 'low',
+      recommendations: List<String>.from(json['recommendations'] ?? []),
+      details: json['details'],
+    );
+  }
+
+  bool get isHighSeverity => severity.toLowerCase() == 'high';
+  bool get isMediumSeverity => severity.toLowerCase() == 'medium';
+}
+
+class SlowestCalculationsResponse {
+  final bool sucesso;
+  final String? erro;
+  final DateTime calculadoEm;
+  final List<SlowCalculation>? slowestCalculations;
+
+  SlowestCalculationsResponse({
+    required this.sucesso,
+    this.erro,
+    required this.calculadoEm,
+    this.slowestCalculations,
+  });
+
+  factory SlowestCalculationsResponse.fromJson(Map<String, dynamic> json) {
+    return SlowestCalculationsResponse(
+      sucesso: json['sucesso'] ?? false,
+      erro: json['erro'],
+      calculadoEm:
+          DateTime.tryParse(json['calculado_em'] ?? '') ?? DateTime.now(),
+      slowestCalculations:
+          json['slowest_calculations'] != null
+              ? (json['slowest_calculations'] as List)
+                  .map((item) => SlowCalculation.fromJson(item))
+                  .toList()
+              : null,
+    );
+  }
+}
+
+class PerformanceIssuesResponse {
+  final bool sucesso;
+  final String? erro;
+  final DateTime calculadoEm;
+  final List<PerformanceIssue>? issues;
+  final List<String>? recommendations;
+
+  PerformanceIssuesResponse({
+    required this.sucesso,
+    this.erro,
+    required this.calculadoEm,
+    this.issues,
+    this.recommendations,
+  });
+
+  factory PerformanceIssuesResponse.fromJson(Map<String, dynamic> json) {
+    return PerformanceIssuesResponse(
+      sucesso: json['sucesso'] ?? false,
+      erro: json['erro'],
+      calculadoEm:
+          DateTime.tryParse(json['calculado_em'] ?? '') ?? DateTime.now(),
+      issues:
+          json['issues'] != null
+              ? (json['issues'] as List)
+                  .map((item) => PerformanceIssue.fromJson(item))
+                  .toList()
+              : null,
+      recommendations:
+          json['recommendations'] != null
+              ? List<String>.from(json['recommendations'])
+              : null,
+    );
+  }
+}
+
+class PerformanceExportResponse {
+  final bool sucesso;
+  final String? erro;
+  final DateTime calculadoEm;
+  final Map<String, dynamic>? metrics;
+  final String? exportFormat;
+
+  PerformanceExportResponse({
+    required this.sucesso,
+    this.erro,
+    required this.calculadoEm,
+    this.metrics,
+    this.exportFormat,
+  });
+
+  factory PerformanceExportResponse.fromJson(Map<String, dynamic> json) {
+    return PerformanceExportResponse(
+      sucesso: json['sucesso'] ?? false,
+      erro: json['erro'],
+      calculadoEm:
+          DateTime.tryParse(json['calculado_em'] ?? '') ?? DateTime.now(),
+      metrics: json['metrics'],
+      exportFormat: json['export_format'],
+    );
+  }
+}
+
+class PerformanceResetResponse {
+  final bool sucesso;
+  final String? erro;
+  final DateTime calculadoEm;
+  final String? message;
+  final DateTime? timestamp;
+
+  PerformanceResetResponse({
+    required this.sucesso,
+    this.erro,
+    required this.calculadoEm,
+    this.message,
+    this.timestamp,
+  });
+
+  factory PerformanceResetResponse.fromJson(Map<String, dynamic> json) {
+    return PerformanceResetResponse(
+      sucesso: json['sucesso'] ?? false,
+      erro: json['erro'],
+      calculadoEm:
+          DateTime.tryParse(json['calculado_em'] ?? '') ?? DateTime.now(),
+      message: json['message'],
+      timestamp:
+          json['timestamp'] != null
+              ? DateTime.tryParse(json['timestamp'])
+              : null,
     );
   }
 }
