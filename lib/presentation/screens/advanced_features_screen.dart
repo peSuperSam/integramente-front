@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../widgets/visualization_3d_widget.dart';
 import '../widgets/ml_analysis_widget.dart';
 import '../widgets/performance_dashboard_widget.dart';
@@ -34,8 +35,29 @@ class _AdvancedFeaturesScreenState extends State<AdvancedFeaturesScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _funcaoController.text = 'x**2 + y**2';
+
+    // Verifica se há argumentos da navegação
+    final arguments = Get.arguments as Map<String, dynamic>?;
+    final focusTab = arguments?['focusTab'] as int? ?? 0;
+    final funcao = arguments?['funcao'] as String?;
+
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: focusTab,
+    );
+
+    // Define a função recebida ou usa a padrão
+    _funcaoController.text = funcao ?? 'x**2 + y**2';
+
+    // Se veio uma função da calculadora, já exibe a visualização
+    if (funcao != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _showVisualization = true;
+        });
+      });
+    }
   }
 
   @override

@@ -115,6 +115,8 @@ class _CalculadoraScreenState extends State<CalculadoraScreen> {
                 _buildSpacing(),
                 _buildBotaoCalcular(controller),
                 _buildSpacing(),
+                _buildBotoesVisualizacao(),
+                _buildSpacing(),
                 _buildAreaResultado(controller),
                 _buildSpacing(large: true),
               ]),
@@ -605,6 +607,119 @@ class _CalculadoraScreenState extends State<CalculadoraScreen> {
     });
   }
 
+  // Botões de visualização e funcionalidades avançadas
+  Widget _buildBotoesVisualizacao() {
+    final hasFunction = _expressaoController.text.trim().isNotEmpty;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildBotaoSecundario(
+            icon: Icons.threed_rotation,
+            label: 'Visualização 3D',
+            color: const Color(0xFF4FC3F7),
+            onPressed: hasFunction ? _mostrarVisualizacao3D : null,
+            tooltip:
+                hasFunction
+                    ? 'Ver função em 3D'
+                    : 'Digite uma função para visualizar',
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildBotaoSecundario(
+            icon: Icons.psychology,
+            label: 'Análise IA',
+            color: const Color(0xFF66BB6A),
+            onPressed: hasFunction ? _mostrarAnaliseIA : null,
+            tooltip:
+                hasFunction
+                    ? 'Análise com Machine Learning'
+                    : 'Digite uma função para analisar',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBotaoSecundario({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onPressed,
+    required String tooltip,
+  }) {
+    final isEnabled = onPressed != null;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      height: 50,
+      decoration: BoxDecoration(
+        color:
+            isEnabled
+                ? color.withValues(alpha: 0.1)
+                : AppColors.textSecondary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              isEnabled
+                  ? color.withValues(alpha: 0.3)
+                  : AppColors.textSecondary.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: isEnabled ? color : AppColors.textSecondary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isEnabled ? color : AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _mostrarAnaliseIA() {
+    if (_expressaoController.text.trim().isEmpty) {
+      SnackBarUtils.showError(context, 'Digite uma função para analisar');
+      return;
+    }
+
+    // Navega para a tela de funcionalidades avançadas com foco na análise IA
+    Get.toNamed(
+      '/advanced-features',
+      arguments: {
+        'funcao': _expressaoController.text.trim(),
+        'focusTab': 1, // Tab de análise IA
+      },
+    );
+  }
+
   // Área de resultado
   Widget _buildAreaResultado(AppController controller) {
     return Obx(() {
@@ -661,6 +776,11 @@ class _CalculadoraScreenState extends State<CalculadoraScreen> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          IconButton(
+            icon: const Icon(Icons.threed_rotation, color: AppColors.primary),
+            onPressed: () => _mostrarVisualizacao3D(),
+            tooltip: 'Visualização 3D',
+          ),
           IconButton(
             icon: const Icon(Icons.share, color: AppColors.primary),
             onPressed: () => _compartilharResultado(ultimoItem),
@@ -1099,6 +1219,22 @@ class _CalculadoraScreenState extends State<CalculadoraScreen> {
     SnackBarUtils.showInfo(
       context,
       'Resultado copiado para a área de transferência',
+    );
+  }
+
+  void _mostrarVisualizacao3D() {
+    if (_expressaoController.text.trim().isEmpty) {
+      SnackBarUtils.showError(context, 'Digite uma função para visualizar');
+      return;
+    }
+
+    // Navega para a tela de funcionalidades avançadas com foco na visualização 3D
+    Get.toNamed(
+      '/advanced-features',
+      arguments: {
+        'funcao': _expressaoController.text.trim(),
+        'focusTab': 0, // Tab de visualização 3D
+      },
     );
   }
 
